@@ -108,6 +108,14 @@ This backend provides a robust, modular, and scalable API for managing MMA fight
 - Dynamic rankings by weight class
 - Background ranking updates after fight results
 - GraphQL API for all operations
+- Title fight tracking
+- Comprehensive fight statistics
+
+## Architecture
+- **Domain Layer**: Core business logic and entities
+- **Application Layer**: Use cases and services
+- **Infrastructure Layer**: External services, repositories, and GraphQL implementation
+- **Presentation Layer**: GraphQL resolvers and types
 
 ## Ranking Algorithm
 - **Win via Knockout or Submission:** 4 points
@@ -119,10 +127,10 @@ This backend provides a robust, modular, and scalable API for managing MMA fight
 Rankings are recalculated in the background after each fight result is recorded, ensuring a responsive API for users.
 
 ## Background Ranking Update
-- When a fight is marked as completed, a background job is enqueued.
-- The job updates the ranking points and statistics for both winner and loser.
-- Rankings are updated per weight class.
-- Implemented using BullMQ and NestJS Bull.
+- When a fight is marked as completed, a background job is enqueued
+- The job updates the ranking points and statistics for both winner and loser
+- Rankings are updated per weight class
+- Implemented using BullMQ and NestJS Bull
 
 ## API Usage Examples
 
@@ -133,8 +141,57 @@ query {
     id
     firstName
     lastName
+    nickname
+    weightClass {
+      name
+      weightLimit
+    }
+    wins
+    losses
+    draws
+    knockouts
+    submissions
     rankingPoints
+  }
+}
+```
+
+### Create a Fighter
+```graphql
+mutation {
+  createFighter(
+    firstName: "John"
+    lastName: "Doe"
+    nickname: "The Destroyer"
+    weightClassId: "..."
+    nationality: "USA"
+    height: "6'0"
+    weight: 185
+    reach: "76"
+    stance: "Orthodox"
+  ) {
+    id
+    firstName
+    lastName
     weightClass { name }
+  }
+}
+```
+
+### Create an Event
+```graphql
+mutation {
+  createEvent(
+    name: "UFC 300"
+    date: "2024-04-13"
+    location: "Las Vegas"
+    venue: "T-Mobile Arena"
+    description: "Historic UFC event"
+  ) {
+    id
+    name
+    date
+    location
   }
 }
 ```
@@ -142,14 +199,21 @@ query {
 ### Create a Fight
 ```graphql
 mutation {
-  createFight(eventId: "...", fighter1Id: "...", fighter2Id: "...") {
+  createFight(
+    eventId: "..."
+    fighter1Id: "..."
+    fighter2Id: "..."
+    round: 3
+    isTitleFight: true
+  ) {
     id
     isCompleted
+    isTitleFight
   }
 }
 ```
 
-### Mark Fight as Completed (Triggers Ranking Update)
+### Mark Fight as Completed
 ```graphql
 mutation {
   markFightAsCompleted(
@@ -162,6 +226,8 @@ mutation {
   ) {
     id
     isCompleted
+    winnerId
+    result
   }
 }
 ```
@@ -174,22 +240,71 @@ query {
     firstName
     lastName
     rankingPoints
+    wins
+    losses
+    draws
   }
 }
 ```
 
-## SQL DDL Example
-See `schema.sql` for the SQL CREATE TABLE statements.
-
-## ERD
-See `erd.png` for the Entity Relationship Diagram.
-
 ## Setup
-- Configure your `.env` for PostgreSQL and Redis
-- Run `npm install`
-- Run database migrations or use TypeORM sync
-- Start Redis server
-- Run `npm run start:dev`
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Configure environment variables:
+   - Copy `.env.example` to `.env`
+   - Update database and Redis connection details
+4. Start Redis server
+5. Run the application:
+   ```bash
+   # Development
+   npm run start:dev
+   
+   # Production
+   npm run start:prod
+   ```
 
----
-For more details, see the code and comments in each module.
+## Database Schema
+See `schema.sql` for the complete database schema.
+
+## Entity Relationship Diagram
+See `erd.txt` for the Entity Relationship Diagram.
+
+## Testing
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## Project Structure
+```
+src/
+├── domain/           # Domain layer
+│   ├── entities/     # Core business entities
+│   └── repositories/ # Repository interfaces
+├── application/      # Application layer
+│   └── services/     # Business logic services
+└── infrastructure/   # Infrastructure layer
+    ├── database/     # Database configuration
+    ├── graphql/      # GraphQL implementation
+    ├── queue/        # Background job processing
+    └── repositories/ # Repository implementations
+```
+
+## Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
