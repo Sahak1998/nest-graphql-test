@@ -1,0 +1,48 @@
+Entity Relationship Diagram (ERD) for MMA Platform:
+
++----------------+       +----------------+       +----------------+
+|   Fighters     |       | Weight Classes |       |    Events      |
++----------------+       +----------------+       +----------------+
+| id (PK)        |       | id (PK)        |       | id (PK)        |
+| first_name     |       | name           |       | name           |
+| last_name      |       | weight_limit   |       | date           |
+| nickname       |       | description    |       | location       |
+| date_of_birth  |       | created_at     |       | venue          |
+| nationality    |       | updated_at     |       | description    |
+| height         |       +----------------+       | is_completed   |
+| weight         |               ^                | created_at     |
+| reach          |               |                +----------------+
+| stance         |               |                        ^
+| wins           |               |                        |
+| losses         |               |                        |
+| draws          |               |                        |
+| knockouts      |               |                        |
+| submissions    |               |                        |
+| ranking_points |               |                        |
+| weight_class_id|---------------|                        |
+| created_at     |                                        |
+| updated_at     |                                        |
++----------------+                                        |
+        ^                                                 |
+        |                                                 |
+        |                                                 |
++----------------+                                        |
+|    Fights      |                                        |
++----------------+                                        |
+| id (PK)        |                                        |
+| event_id       |----------------------------------------|
+| fighter1_id    |----------------------------------------|
+| fighter2_id    |----------------------------------------|
+| winner_id      |----------------------------------------|
+| result         |                                        |
+| round          |                                        |
+| time           |                                        |
+| is_completed   |                                        |
+| created_at     |                                        |
+| updated_at     |                                        |
++----------------+                                        |
+
+Notes:
+- Fighters belong to a Weight Class (many-to-one).
+- Fights are associated with an Event (many-to-one).
+- Fights reference two Fighters (fighter1 and fighter2) and optionally a winner (all many-to-one). 
